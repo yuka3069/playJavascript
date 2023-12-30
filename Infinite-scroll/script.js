@@ -2,21 +2,25 @@ const count = 30;
 const apiKey = "-AychDWElHhEzu0KQFYoxNTEqvaXTd0DT3SaK-oEfrM";
 const apiUrl = `https://api.unsplash.com/photos/random/?client_id=${apiKey}&count=${count}`;
 let photoArray = [];
+let imagesLoadedNum = 0;
+let ready = false;
 //get photo from api
 
+let totalImage = 0;
+
 function imageLoaded() {
-  console.log("image loaded");
+  imagesLoadedNum++;
+  if (imagesLoadedNum === totalImage) {
+    ready = true;
+    $("#loader").hide();
+    imagesLoadedNum = 0;
+  }
 }
 async function getPhotos() {
   try {
-    $("#loader").show();
-    $("#image-container").hide();
-
     const resp = await fetch(apiUrl);
     photoArray = await resp.json();
-
-    $("#loader").hide();
-    $("#image-container").show();
+    totalImage = photoArray.length;
     display();
   } catch (error) {}
 }
@@ -41,8 +45,10 @@ async function display() {
 $(window).on("scroll", () => {
   if (
     $(window).innerHeight() + $(window).scrollTop() >=
-    $(document).height() - 1000
+      $(document).height() - 1000 &&
+    ready
   ) {
+    ready = false;
     getPhotos();
   }
 });
